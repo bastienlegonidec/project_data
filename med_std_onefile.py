@@ -1,24 +1,64 @@
-# This file computes the mean and standard deviation 
-# for the RGB channels of the bee pixels in the image.
-
 import cv2
 import numpy as np
+import pandas as pd
+import os
+import datetime
 
-# Retrieve image and mask
-image = cv2.imread('project_data/train/images/1.jpg')
-masque = cv2.imread('project_data/train/masks/binary_1.tif', cv2.IMREAD_GRAYSCALE)
+# Get execution time
+start_time = datetime.datetime.now()
 
-# Isolate the part of the image corresponding to the mask 
-image_isolee = cv2.bitwise_and(image, image, mask=masque)
+# Extracting dataset from excel file and addition of features as columns
+df = pd.read_excel('project_data/train/classif.xlsx', index_col=0)
 
-# Get pixels corresponding to the bee 
-bee_pixels = image_isolee[masque != 0]
+# Computation of the mean and standard deviation for the RGB channels of the bee pixels in the image.
 
-# Compute mean and standard deviation for each channel
-mean_values = np.mean(bee_pixels, axis=0)
-std_values = np.std(bee_pixels, axis=0)
+# Path to the folder containing images and masks
+folder_path = 'project_data/train/'
 
-print("Mean RGB:", mean_values)
-print("Standard Deviation RGB:", std_values)
+# Iterate over each image and mask
+for i in range(1, 251):
 
+    # Skip image 154 as it does not have a mask
+    if i == 154:
+        continue
+
+    # Retrieve image and mask
+    image_path = os.path.join(folder_path, 'images', f'{i}.jpg')
+    mask_path = os.path.join(folder_path, 'masks', f'binary_{i}.tif')
+
+    image = cv2.imread(image_path)
+    masque = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
+
+    # Isolate the part of the image corresponding to the mask 
+    image_isolee = cv2.bitwise_and(image, image, mask=masque)
+
+    # Get pixels corresponding to the bee 
+    bee_pixels = image_isolee[masque != 0]
+
+    # Compute mean and standard deviation for each channel
+    median_values = np.median(bee_pixels, axis=0)
+    std_values = np.std(bee_pixels, axis=0)
+
+    # Split median values into R, G, and B channels
+    R_median, G_median, B_median = median_values
+
+    # Split standard deviation values into R, G, and B channels
+    R_std, G_std, B_std = std_values
+
+    # Add median values for the first row
+    df.loc[df.index[i-1], 'Median_R'] = R_median
+    df.loc[df.index[i-1], 'Median_G'] = G_median
+    df.loc[df.index[i-1], 'Median_B'] = B_median
+
+    # Add standard deviation values for the first row
+    df.loc[df.index[i-1], 'Std_R'] = R_std
+    df.loc[df.index[i-1], 'Std_G'] = G_std
+    df.loc[df.index[i-1], 'Std_B'] = B_std
+
+# Save the DataFrame to a CSV file
+df.to_csv('result.csv', index=False)
+
+# Get execution time
+end_time = datetime.datetime.now()
+print(f"Execution time: {end_time - start_time}")
 
