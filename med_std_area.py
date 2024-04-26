@@ -4,25 +4,23 @@ import pandas as pd
 import os
 import datetime
 
-# Get execution time
+# Used to compute execution time
 start_time = datetime.datetime.now()
 
-# Extracting dataset from excel file and addition of features as columns
+# Extracting dataset from excel file 
 df = pd.read_excel('project_data/train/classif.xlsx', index_col=0)
 
-# Computation of the mean and standard deviation for the RGB channels of the bee pixels in the image.
+# Computation of the mean and standard deviation 
+# for the RGB channels of the bee pixels in the image.
 
-# Path to the folder containing images and masks
 folder_path = 'project_data/train/'
 
-# Iterate over each image and mask
 for i in range(1, 251):
 
-    # Skip image 154 as it does not have a mask
+    # Skipping image 154 as it does not have a mask
     if i == 154:
         continue
 
-    # Retrieve image and mask
     image_path = os.path.join(folder_path, 'images', f'{i}.jpg')
     mask_path = os.path.join(folder_path, 'masks', f'binary_{i}.tif')
 
@@ -35,30 +33,32 @@ for i in range(1, 251):
     # Get pixels corresponding to the bee 
     bee_pixels = image_isolee[masque != 0]
 
-    # Compute mean and standard deviation for each channel
     median_values = np.median(bee_pixels, axis=0)
     std_values = np.std(bee_pixels, axis=0)
 
-    # Split median values into R, G, and B channels
     R_median, G_median, B_median = median_values
-
-    # Split standard deviation values into R, G, and B channels
     R_std, G_std, B_std = std_values
 
-    # Add median values for the first row
+    # Add median values to dataframe
     df.loc[df.index[i-1], 'Median_R'] = R_median
     df.loc[df.index[i-1], 'Median_G'] = G_median
     df.loc[df.index[i-1], 'Median_B'] = B_median
 
-    # Add standard deviation values for the first row
+    # Add standard deviation values to dataframe
     df.loc[df.index[i-1], 'Std_R'] = R_std
     df.loc[df.index[i-1], 'Std_G'] = G_std
     df.loc[df.index[i-1], 'Std_B'] = B_std
 
-# Save the DataFrame to a CSV file
+    # Computing area of each bug
+    mask_area = cv2.countNonZero(masque)
+
+    # Add area to dataframe
+    df.loc[df.index[i-1], 'Area'] = mask_area
+
+
+# Exporting DataFrame to a CSV file
 df.to_csv('result.csv', index=False)
 
-# Get execution time
 end_time = datetime.datetime.now()
 print(f"Execution time: {end_time - start_time}")
 
