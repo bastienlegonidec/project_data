@@ -22,9 +22,9 @@ folder_path = 'project_data/train/'
 ### Feature 1 - Symmetry index function
 
 def symmetry_index(image):
+
     # Convertir l'image en niveaux de gris
-    gray = image.convert('L')
-    gray_array = np.array(gray)
+    gray_array = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     # Calculer l'indice de symétrie
     half_width = gray_array.shape[1] // 2
