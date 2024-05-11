@@ -166,4 +166,13 @@ ax.set_xlabel("MDS Component 1")
 ax.set_ylabel("MDS Component 2")
 ax.set_title('MDS Visualization')
 
-plt.savefig('project_data/dataVisualization/graphs/mds.png')        
+plt.savefig('project_data/dataVisualization/graphs/mds.png')
+
+plt.figure(figsize=(8, 6))
+for type in types:
+    plt.scatter(df[df['bug type'] == type]['sym_index'], df[df['bug type'] == type]['Area'], label=type, alpha=0.7)
+plt.xlabel('Symmetry Index')
+plt.ylabel('Area')
+plt.title('Scatter Plot: Symmetry Index vs Area')
+plt.legend()
+plt.grid(True)        
