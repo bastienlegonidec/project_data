@@ -1,0 +1,51 @@
+bug type,SVM,SVM_Recognition
+Bee,Bee,True
+Hover fly,Bee,False
+Bee,Bee,True
+Bumblebee,Bee,False
+Bumblebee,Bumblebee,True
+Hover fly,Bee,False
+Bee,Bee,True
+Bee,Bee,True
+Bumblebee,Bumblebee,True
+Bumblebee,Bumblebee,True
+Bumblebee,Bumblebee,True
+Hover fly,Butterfly,False
+Bumblebee,Bee,False
+Bumblebee,Bumblebee,True
+Bee,Bee,True
+Bumblebee,Bumblebee,True
+Bee,Bee,True
+Bumblebee,Bumblebee,True
+Bee,Bee,True
+Bumblebee,Bumblebee,True
+Bumblebee,Bumblebee,True
+Bumblebee,Bumblebee,True
+Bee,Bee,True
+Bumblebee,Bee,False
+Bee,Bee,True
+Bumblebee,Bee,False
+Bee,Bee,True
+Bumblebee,Bumblebee,True
+Bee,Bee,True
+Bumblebee,Bumblebee,True
+Bumblebee,Bee,False
+Bee,Bee,True
+Bee,Bee,True
+Bee,Bee,True
+Bumblebee,Bumblebee,True
+Bee,Bee,True
+Bee,Bee,True
+Bumblebee,Bumblebee,True
+Bee,Bee,True
+Hover fly,Bee,False
+Bee,Bee,True
+Bumblebee,Bee,False
+Bumblebee,Bee,False
+Bee,Bee,True
+Hover fly,Bee,False
+Wasp,Bee,False
+Butterfly,Dragonfly,False
+Bumblebee,Bumblebee,True
+Bee,Bee,True
+Bumblebee,Bumblebee,True
