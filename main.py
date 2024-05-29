@@ -1,6 +1,6 @@
 import numpy as np
 import os
-import cv2
+import cv2 
 import pandas as pd
 import datetime
 
@@ -53,7 +53,7 @@ def ratio_longest_orthogonal_lines(mask):
             ratio = side_lengths[2] / side_lengths[3]
             if ratio > max_ratio:
                 max_ratio = ratio
-    return max_ratio
+    return float(max_ratio)
 
 ### (Extra) Feature 5 - Mean Intensity ###
 
@@ -63,13 +63,33 @@ def mean_intensity(image, mask):
     
     return mean_intensity
 
+### Feature 6 - Ratio of Bug Pixels to Total Pixels ###
+def bug_to_total_ratio(mask):
+    if mask is None:
+        return 0
+    total_pixels = mask.shape[0] * mask.shape[1]
+    bug_pixels = cv2.countNonZero(mask)
+    return bug_pixels / total_pixels if total_pixels > 0 else 0
+
+### Feature 7 - Min, Max, Mean Values for Red, Green, and Blue within the Bug Mask ###
+def min_max_mean_color_bug_mask(image, mask):
+    if mask is None:
+        return np.zeros(3), np.zeros(3), np.zeros(3)    
+    image_isolated = cv2.bitwise_and(image, image, mask=mask)
+    red_values = image_isolated[:, :, 0][mask != 0]
+    green_values = image_isolated[:, :, 1][mask != 0]
+    blue_values = image_isolated[:, :, 2][mask != 0]
+    min_values = np.array([np.min(red_values), np.min(green_values), np.min(blue_values)])
+    max_values = np.array([np.max(red_values), np.max(green_values), np.max(blue_values)])
+    mean_values = np.array([np.mean(red_values), np.mean(green_values), np.mean(blue_values)])
+    return min_values, max_values, mean_values
 
 
 # Extracting dataset from excel file 
-df = pd.read_excel('train\classif.xlsx', index_col=0, engine='openpyxl')
+df = pd.read_excel('project_data/train/classif.xlsx', index_col=0, engine='openpyxl')
 
 # Parsing files 
-folder_path = 'train/'
+folder_path = 'project_data/train/'
 
 # Main loop to extract features from each image and mask in the dataset
 for i in range(1, max(len(os.listdir(folder_path + 'images')), len(os.listdir(folder_path + 'masks')))):
@@ -83,16 +103,18 @@ for i in range(1, max(len(os.listdir(folder_path + 'images')), len(os.listdir(fo
         continue
 
     df.loc[df.index[i-1], 'sym_index'] = symmetry_index(image)
-    median_std_values = median_std(image, mask)
-    df.loc[df.index[i-1], ['Median_R', 'Median_G', 'Median_B', 'Std_R', 'Std_G', 'Std_B']] = median_std_values
+    df.loc[df.index[i-1], ['Median_R', 'Median_G', 'Median_B', 'Std_R', 'Std_G', 'Std_B']] = median_std(image, mask)
     df.loc[df.index[i-1], 'Area'] = bug_area(mask)
-    ratio_lines = ratio_longest_orthogonal_lines(mask)
-    df.loc[df.index[i-1], 'Orthogonal_Lines'] = ratio_lines
-    mean_int = mean_intensity(image, mask)
-    df.loc[df.index[i-1], 'Mean_Intensity'] = mean_int
+    df.loc[df.index[i-1], 'Orthogonal_Lines'] = ratio_longest_orthogonal_lines(mask)
+    df.loc[df.index[i-1], 'Mean_Intensity'] = mean_intensity(image, mask)
+    df.loc[df.index[i-1], 'Bug_to_Total_Ratio'] = bug_to_total_ratio(mask)
+    min_values, max_values, mean_values = min_max_mean_color_bug_mask(image, mask)
+    df.loc[df.index[i-1], ['Min_R_bug', 'Min_G_bug', 'Min_B_bug']] = min_values
+    df.loc[df.index[i-1], ['Max_R_bug', 'Max_G_bug', 'Max_B_bug']] = max_values
+    df.loc[df.index[i-1], ['Mean_R_bug', 'Mean_G_bug', 'Mean_B_bug']] = mean_values
 
 # Exporting DataFrame to a CSV file
-df.to_csv(r'dataVisualisation\result.csv', index=False)
+df.to_csv(r'project_data\dataVisualization\result.csv', index=False)
 
 end_time = datetime.datetime.now()
 print(f"Execution time: {end_time - start_time}")
