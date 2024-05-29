@@ -14,7 +14,7 @@ df = pd.read_csv("project_data/dataVisualization/result.csv")
 df.dropna(inplace=True)
 
 # Combine butterfly, dragonfly, hoverfly, and wasp into "other"
-df['bug type'] = df['bug type'].replace(['Butterfly', 'Dragonfly', 'Hoverfly', 'Wasp'], 'Other')
+df['bug type'] = df['bug type'].replace(['Butterfly', 'Dragonfly', 'Hover fly', 'Wasp'], 'Other')
 
 # Feature columns
 train_predictor_columns = df.columns.difference(['bug type', 'species'])
@@ -25,7 +25,6 @@ train_feats = df[train_predictor_columns]
 
 # Encode target labels
 y_encoded, y_labels = pd.factorize(target_labels)
-
 # Split data into train and test sets
 X_train, X_test, y_train, y_test = train_test_split(train_feats, y_encoded, test_size=0.2, random_state=42)
 
