@@ -8,7 +8,7 @@ from sklearn.decomposition import PCA
 from sklearn.manifold import LocallyLinearEmbedding, MDS, Isomap, TSNE
 
 # Get classes of dataset
-df = pd.read_csv('project_data/dataVisualization/result.csv')
+df = pd.read_csv('dataVisualization/result.csv')
 types = df['bug type'].unique().tolist()
 types.remove('Bee & Bumblebee')
 
@@ -22,7 +22,7 @@ feat_names.remove('bug type')
 sns.boxplot(data=df, x='Area', y='bug type', palette='magma')
 plt.title('Area of bugs by type')
 plt.grid(visible=True, axis='x')
-plt.savefig('project_data/dataVisualization/graphs/boxplot_area.png')
+plt.savefig('dataVisualization/graphs/boxplot_area.png')
 #plt.show()
 
 # Barplot displaying average median rgb channel values by type
@@ -42,7 +42,7 @@ def plot_rgb_values(df, op):
     plt.grid(visible=True, axis='y')
     plt.ylabel(f'{op} RGB Values')
     plt.xticks(rotation=45)
-    plt.savefig(f'project_data/dataVisualization/graphs/barplot_{op}.png')
+    plt.savefig(f'dataVisualization/graphs/barplot_{op}.png')
     #plt.show()
 
 plot_rgb_values(df_grouped_med, 'Median')
@@ -79,7 +79,7 @@ ax.legend();
 ax.set_xlabel("PC1 ({0}% of explained variance)".format(pc1, fontsize=12));
 ax.set_ylabel("PC2 ({0}% of explained variance)".format(pc2, fontsize=12));
 ax.set_title('PCA space', fontsize=12);
-plt.savefig('project_data/dataVisualization/graphs/scatter_pca.png')
+plt.savefig('dataVisualization/graphs/scatter_pca.png')
 
 ## t-SNE 
 
@@ -102,7 +102,7 @@ for i, perplexity in enumerate(perplexities):
     ax.set_title(f"t-SNE Visualization (perplexity={perplexity})")
 
 plt.tight_layout()
-plt.savefig('project_data/dataVisualization/graphs/tsne_visu.png')
+plt.savefig('dataVisualization/graphs/tsne_visu.png')
 
 ## Isomap
 
@@ -125,7 +125,7 @@ for i, n_neighbors in enumerate(n_neighbors_values):
     ax.set_title(f"ISOMAP Visualization (n_neighbors={n_neighbors})")
 
 plt.tight_layout()
-plt.savefig('project_data/dataVisualization/graphs/isomap.png')
+plt.savefig('dataVisualization/graphs/isomap.png')
 
 ## LLE 
 
@@ -148,7 +148,7 @@ for i, n_neighbors in enumerate(n_neighbors_values):
     ax.set_title(f"LLE Visualization (n_neighbors={n_neighbors})")
 
 plt.tight_layout()
-plt.savefig('project_data/dataVisualization/graphs/lle.png')
+plt.savefig('dataVisualization/graphs/lle.png')
 
 ## MDS 
 
@@ -166,7 +166,7 @@ ax.set_xlabel("MDS Component 1")
 ax.set_ylabel("MDS Component 2")
 ax.set_title('MDS Visualization')
 
-plt.savefig('project_data/dataVisualization/graphs/mds.png')
+plt.savefig('dataVisualization/graphs/mds.png')
 
 plt.figure(figsize=(8, 6))
 for type in types:

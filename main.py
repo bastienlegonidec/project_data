@@ -86,10 +86,10 @@ def min_max_mean_color_bug_mask(image, mask):
 
 
 # Extracting dataset from excel file 
-df = pd.read_excel('project_data/train/classif.xlsx', index_col=0, engine='openpyxl')
+df = pd.read_excel('train/classif.xlsx', index_col=0, engine='openpyxl')
 
 # Parsing files 
-folder_path = 'project_data/train/'
+folder_path = 'train/'
 
 # Main loop to extract features from each image and mask in the dataset
 for i in range(1, max(len(os.listdir(folder_path + 'images')), len(os.listdir(folder_path + 'masks')))):
@@ -114,7 +114,7 @@ for i in range(1, max(len(os.listdir(folder_path + 'images')), len(os.listdir(fo
     df.loc[df.index[i-1], ['Mean_R_bug', 'Mean_G_bug', 'Mean_B_bug']] = mean_values
 
 # Exporting DataFrame to a CSV file
-df.to_csv(r'project_data\dataVisualization\result.csv', index=False)
+df.to_csv(r'dataVisualization/result.csv', index=False)
 
 end_time = datetime.datetime.now()
 print(f"Execution time: {end_time - start_time}")
