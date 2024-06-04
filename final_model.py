@@ -2,80 +2,86 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+from sklearn.impute import SimpleImputer
 from sklearn.neural_network import MLPClassifier
 from sklearn.svm import SVC
 from sklearn.ensemble import VotingClassifier
-from sklearn.metrics import classification_report
 from imblearn.over_sampling import SMOTE
 
-def process_bug_data(file_path, output_path):
-    # Charger les données
-    df = pd.read_csv(file_path)
+def train_and_test_model(train_features, test_features):
+    # Load training labels
+    train_df = pd.read_excel('train/classif.xlsx', index_col=0, engine='openpyxl')
 
-    # Supprimer les valeurs manquantes
-    df.dropna(inplace=True)
+    # Merge features with labels
+    train_df = train_df.merge(train_features, left_index=True, right_on='ID')
 
-    # Supprimer les valeurs 'Bee & Bumblebee'
-    df = df[df['bug type'] != 'Bee & Bumblebee']
-
-    # Combine butterfly, dragonfly, hoverfly, and wasp into "other"
-    df['bug type'] = df['bug type'].replace(['Butterfly', 'Dragonfly', 'Hover fly', 'Wasp'], 'Other')
-
-    # Ajouter des caractéristiques supplémentaires si nécessaire
-    # df['Color_Ratio'] = df['Median_R'] / (df['Median_G'] + df['Median_B'])  # Exemple de caractéristique supplémentaire
-
-    # Sélectionner les colonnes de caractéristiques et la cible
-    train_predictor_columns = df.columns.difference(['bug type', 'species'])
-    target_labels = df['bug type']
-    train_feats = df[train_predictor_columns]
-
-    # Encodage des étiquettes de la cible
+    # Prepare training data
+    train_predictor_columns = train_df.columns.difference(['bug type', 'species', 'ID'])
+    train_feats = train_df[train_predictor_columns]
+    target_labels = train_df['bug type']
     y_encoded, y_labels = pd.factorize(target_labels)
 
-    # Division des données en ensembles d'entraînement et de test
-    X_train, X_test, y_train, y_test = train_test_split(train_feats, y_encoded, test_size=0.2, random_state=42)
+    # Impute missing values
+    imputer = SimpleImputer(strategy='mean')
+    train_feats_imputed = imputer.fit_transform(train_feats)
 
-    # Suréchantillonnage des classes minoritaires
-    sm = SMOTE(random_state=42)
+    # Vérifier la distribution des classes
+    class_distribution = np.bincount(y_encoded)
+    print("Distribution des classes dans l'ensemble d'entraînement :", class_distribution)
+
+    # Filtrer les classes ayant moins de 2 échantillons
+    min_samples = 2
+    indices_to_keep = [i for i, count in enumerate(class_distribution) if count >= min_samples]
+    filtered_indices = [i for i in range(len(y_encoded)) if y_encoded[i] in indices_to_keep]
+    X_filtered = train_feats_imputed[filtered_indices]
+    y_filtered = y_encoded[filtered_indices]
+
+    # Recalculer la distribution des classes après filtrage
+    filtered_class_distribution = np.bincount(y_filtered)
+    print("Distribution des classes après filtrage :", filtered_class_distribution)
+
+    # Split data for training and validation
+    X_train, X_val, y_train, y_val = train_test_split(X_filtered, y_filtered, test_size=0.2, random_state=42)
+
+    # Handle imbalanced classes with SMOTE
+    # Adjust n_neighbors to be less than the number of samples in the smallest class
+    min_class_samples = np.min(np.bincount(y_train))
+    n_neighbors = min(5, min_class_samples - 1)
+
+    sm = SMOTE(sampling_strategy='auto', k_neighbors=max(1, n_neighbors), random_state=42)
     X_train_res, y_train_res = sm.fit_resample(X_train, y_train)
 
-    # Normalisation des données
+    # Normalize data
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train_res)
-    X_test_scaled = scaler.transform(X_test)
+    X_val_scaled = scaler.transform(X_val)
 
-    # Définir les modèles de base
+    # Define classifiers
     mlp = MLPClassifier(hidden_layer_sizes=(32, 16, 8), alpha=0.001, max_iter=5000, solver='adam', random_state=0, tol=1e-9)
     svm = SVC(C=100, kernel='linear', degree=3, gamma='scale', coef0=0, probability=True)
 
-    # Créer un classifieur de vote avec les modèles MLP et SVM
+    # Voting classifier
     voting_clf = VotingClassifier(estimators=[('mlp', mlp), ('svm', svm)], voting='soft')
 
-    # Entraîner le classifieur de vote
+    # Train classifier
     voting_clf.fit(X_train_scaled, y_train_res)
 
-    # Prédiction avec le classifieur de vote
-    y_pred = voting_clf.predict(X_test_scaled)
+    # Prepare test data
+    test_predictor_columns = test_features.columns.difference(['ID'])
+    test_feats = test_features[test_predictor_columns]
 
-    # Évaluation de la performance
-    labels = np.unique(y_test)
-    classification_rep = classification_report(y_test, y_pred, labels=labels, target_names=y_labels[labels])
-    print("Classification Report:")
-    print(classification_rep)
+    # Impute missing values in test data
+    test_feats_imputed = imputer.transform(test_feats)
 
-    # Création du DataFrame avec les résultats
-    results_df = pd.DataFrame({
-        'Bug_type': y_labels[y_test],
-        'Recognition': pd.Series(y_labels[y_test]),
-        'Predicted_Bug': y_labels[y_pred],
-        'True_or_False': (pd.Series(y_labels[y_test]) == pd.Series(y_labels[y_pred])).map({True: 'True', False: 'False'})
-    })
+    # Normalize test data
+    X_test_scaled = scaler.transform(test_feats_imputed)
 
-    # Sélectionner les colonnes nécessaires
-    results_df = results_df[['Bug_type', 'Recognition', 'Predicted_Bug', 'True_or_False']]
+    # Predict using the trained model
+    y_test_pred = voting_clf.predict(X_test_scaled)
+    y_test_pred_labels = y_labels[y_test_pred]
 
-    # Enregistrer le DataFrame dans un fichier CSV
-    results_df.to_csv(output_path, index=False)
+    # Prepare output DataFrame
+    output_df = pd.DataFrame({'ID': test_features['ID'], 'bug type': y_test_pred_labels})
 
-# Exemple d'appel de la fonction
-process_bug_data("dataVisualization/result.csv", "stacking_recognition.csv")
+    # Save output to CSV
+    output_df.to_csv('test_results.csv', index=False)
