@@ -6,7 +6,7 @@ from sklearn.cluster import KMeans, AgglomerativeClustering
 from sklearn.metrics import silhouette_score
 
 # Charger et prétraiter les données
-data = pd.read_csv('/home/codespace/project_data/dataVisualization/result.csv')
+data = pd.read_csv('project_data/dataVisualization/result.csv')
 data.dropna(inplace=True)
 X = data[['Median_R', 'Median_G', 'Median_B', 'Std_R', 'Std_G', 'Std_B', 'Area']]
 y = data['bug type']

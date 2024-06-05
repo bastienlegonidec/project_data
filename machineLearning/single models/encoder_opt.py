@@ -12,6 +12,7 @@ df = pd.read_csv('project_data/dataVisualization/result.csv')
 
 # Suppression des valeurs 'Bee & Bumblebee'
 df = df[df['bug type'] != 'Bee & Bumblebee']
+df['bug type'] = df['bug type'].replace(['Butterfly', 'Dragonfly', 'Hover fly', 'Wasp'], 'Other')
 
 # Sélection des caractéristiques et de la cible
 X = df.drop(columns=['bug type', 'species'])

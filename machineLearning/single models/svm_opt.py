@@ -9,6 +9,8 @@ df = pd.read_csv("project_data/dataVisualization/result.csv")
 
 # Supprimer les valeurs manquantes
 df = df.dropna()
+df['bug type'] = df['bug type'].replace(['Butterfly', 'Dragonfly', 'Hover fly', 'Wasp'], 'Other')
+
 
 # Sélectionner les colonnes de caractéristiques et la cible
 train_predictor_columns = ["Median_R", "Median_G", "Median_B", "Std_R", "Std_G", "Std_B", "Area"]

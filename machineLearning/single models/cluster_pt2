@@ -1,0 +1,42 @@
+from matplotlib import pyplot as plt
+import pandas as pd
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+
+data = pd.read_csv('project_data/dataVisualization/result.csv')
+data.dropna(inplace=True)
+X = data[['Median_R', 'Median_G', 'Median_B', 'Std_R', 'Std_G', 'Std_B', 'Area']]
+y = data['bug type']
+
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Appliquer KMeans pour k=3
+kmeans_3 = KMeans(n_clusters=3, random_state=42)
+labels_3 = kmeans_3.fit_predict(X_scaled)
+
+# Appliquer KMeans pour k=4
+kmeans_4 = KMeans(n_clusters=4, random_state=42)
+labels_4 = kmeans_4.fit_predict(X_scaled)
+
+# Créer des graphiques pour k=3 et k=4
+fig, axes = plt.subplots(1, 2, figsize=(14, 7))
+
+# Plot pour k=3
+scatter_3 = axes[0].scatter(X_scaled[:, 0], X_scaled[:, 1], c=labels_3, cmap='viridis', marker='o', label='Data Points')
+centroids_3 = axes[0].scatter(kmeans_3.cluster_centers_[:, 0], kmeans_3.cluster_centers_[:, 1], s=300, c='red', marker='x', label='Centroids')
+axes[0].set_title('KMeans Clusters (k=3)')
+axes[0].set_xlabel('Feature 1')
+axes[0].set_ylabel('Feature 2')
+axes[0].legend(loc='best')
+
+# Plot pour k=4
+scatter_4 = axes[1].scatter(X_scaled[:, 0], X_scaled[:, 1], c=labels_4, cmap='viridis', marker='o', label='Data Points')
+centroids_4 = axes[1].scatter(kmeans_4.cluster_centers_[:, 0], kmeans_4.cluster_centers_[:, 1], s=300, c='red', marker='x', label='Centroids')
+axes[1].set_title('KMeans Clusters (k=4)')
+axes[1].set_xlabel('Feature 1')
+axes[1].set_ylabel('Feature 2')
+axes[1].legend(loc='best')
+
+plt.tight_layout()
+plt.show()

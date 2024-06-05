@@ -13,6 +13,7 @@ df.dropna(inplace=True)
 
 # Supprimer les valeurs 'Bee & Bumblebee'
 df = df[df['bug type'] != 'Bee & Bumblebee']
+df['bug type'] = df['bug type'].replace(['Butterfly', 'Dragonfly', 'Hover fly', 'Wasp'], 'Other')
 
 # Sélectionner les colonnes de caractéristiques et la cible
 train_predictor_columns = df.columns.difference(['bug type', 'species'])
