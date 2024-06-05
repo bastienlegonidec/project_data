@@ -36,8 +36,8 @@ def process_bug_data(train_features_csv, test_features_csv, output_path):
     X_train, X_val, y_train, y_val = train_test_split(train_feats, y_encoded, test_size=0.2, random_state=42)
 
     # Suréchantillonnage des classes minoritaires
-    #sm = SMOTE(random_state=42)
-    #X_train_res, y_train_res = sm.fit_resample(X_train, y_train)
+    sm = SMOTE(random_state=42)
+    X_train_res, y_train_res = sm.fit_resample(X_train, y_train)
 
     # Normalisation des données
     scaler = StandardScaler()
